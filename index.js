@@ -51,16 +51,6 @@ const compare = (t1, t2) => {
 }
 // compare([ '10', '37', '41', 'PM' ], [ '10', '38', '58', 'PM' ])
 
-const validate = () => {
-	let time = new Date().toLocaleTimeString().split(":");
-	let [h, m, s] = time;
-	let maradian = s.split(" ");
-	const full = [h, m, maradian].flat(1);
-	// console.log(full)
-	return full;
-}
-// validate()
-
 app.get('/', async (req, res) => {
 	res.send("this is from our awesome otp backend server")
 })
@@ -72,7 +62,7 @@ app.post('/generate', async (req, res) => {
 		const user = await db.collection(COLLECTION).findOne({ email: req.body.email });
 		if (!user) {
 			const otp = Math.random().toString(10).split('.')[1].slice(0, 6);
-			await db.collection(COLLECTION).insertOne({ time: validate(), email: req.body.email, otp: otp });
+			await db.collection(COLLECTION).insertOne({ time: req.body.time, email: req.body.email, otp: otp });
 			const transporter = nodemailer.createTransport({
 				service: 'gmail',
 				auth: {
@@ -113,6 +103,7 @@ app.post('/verify', async (req, res) => {
 		const db = client.db(DATABASE);
 		const user = await db.collection(COLLECTION).findOne({ email: req.body.email });
 		if (user) {
+			console.log(user.opt,req.body.otp , user.time,req.body.otp)
 			if (user.otp === req.body.otp && compare(user.time, req.body.time)) {
 				await db.collection(COLLECTION).deleteOne({ email: req.body.email });
 				res.status(200).json({ message: 'OTP Matched', result: true });
