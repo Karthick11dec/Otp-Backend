@@ -61,7 +61,7 @@ const validate = () => {
 }
 // validate()
 
-app.length('/', async (req, res) => {
+app.get('/', async (req, res) => {
 	res.send("this is from our awesome otp backend server")
 })
 
