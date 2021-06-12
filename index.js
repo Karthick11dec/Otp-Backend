@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 // const DBURL = 'mongodb://127.0.0.1:27017';
-const DBURL = process.env.DBURL || 'mongodb://127.0.0.1:27017' ;
+const DBURL = process.env.DBURL || 'mongodb://127.0.0.1:27017';
 const DATABASE = "Otp_Manager";
 const COLLECTION = 'Otp';
 const PORT = process.env.PORT || 5000;
@@ -20,14 +20,14 @@ const mongoClient = mongodb.MongoClient;
 
 //opt is for control the registeration, before creating an account with any apps
 
-const compare = (t1,t2) => {
+const compare = (t1, t2) => {
 
- 	let m = Math.abs(parseInt(t2[0]) - parseInt(t1[0]));
+	let m = Math.abs(parseInt(t2[0]) - parseInt(t1[0]));
 
 	var a = "";
 
 	if (m === 0) {
-		if (t1[1] < t2[1] || t1[1] === t2[1] ) {
+		if (t1[1] < t2[1] || t1[1] === t2[1]) {
 			let r = t2[1] - t1[1]
 			if (r <= 5 && t1[3] === t2[3]) {
 				a = "valid";
@@ -38,8 +38,7 @@ const compare = (t1,t2) => {
 		}
 	}
 	else if (m === 1) {
-		if ((t2[1] === "01" || t2[1] === "02" || t2[1] === "03" || t2[1] === "04") && t1[3] === t2[3] )
-		{
+		if ((t2[1] === "01" || t2[1] === "02" || t2[1] === "03" || t2[1] === "04") && t1[3] === t2[3]) {
 			let h = 60 - parseInt(t1[1]);
 			let a = h + parseInt(t2[1]);
 			a = "valid";
@@ -61,6 +60,10 @@ const validate = () => {
 	return full;
 }
 // validate()
+
+app.length('/', async (req, res) => {
+	res.send("this is from our awesome otp backend server")
+})
 
 app.post('/generate', async (req, res) => {
 	try {
@@ -110,7 +113,7 @@ app.post('/verify', async (req, res) => {
 		const db = client.db(DATABASE);
 		const user = await db.collection(COLLECTION).findOne({ email: req.body.email });
 		if (user) {
-			if (user.otp === req.body.otp && compare(user.time, req.body.time) ) {
+			if (user.otp === req.body.otp && compare(user.time, req.body.time)) {
 				await db.collection(COLLECTION).deleteOne({ email: req.body.email });
 				res.status(200).json({ message: 'OTP Matched', result: true });
 			} else {
