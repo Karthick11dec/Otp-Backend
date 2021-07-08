@@ -64,5 +64,13 @@ const verifyTime = (currentTime, olderTime, initialExpiry) => {
 
     }
 }
-// verifyTime(new date when verify, old date from genartion, initialExpiry from genaration)
-module.exports = { verifyTime, expireTime };
+
+//----------------   genarate opt time   --------------- ////////////////////////
+
+const initialTime = (t) => {
+	let time = Extra(t);
+	let c = Convert(time);
+	return (c + parseInt(time[2]) + expireTime)
+}
+
+module.exports = { verifyTime, initialTime };

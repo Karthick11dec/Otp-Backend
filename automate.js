@@ -1,5 +1,3 @@
-//----------   requirements  ---------------/////////
-
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const DBURL = process.env.DBURL || 'mongodb://127.0.0.1:27017';
@@ -15,7 +13,6 @@ const Automate = async () => {
         const client = await mongoClient.connect(DBURL);
         const db = client.db(Database);
         const user = await db.collection(Docs).find({ time: 1 }).toArray();
-        // console.log(user)
         if (user.length > 0) {
             user.map(item => {
                 let deletor = verifyTime(new Date().toLocaleTimeString(), item.time, item.expiry);

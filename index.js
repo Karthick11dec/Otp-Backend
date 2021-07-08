@@ -18,8 +18,13 @@ const PORT = process.env.PORT || 5000;
 
 //--------------------------     coding start's here   ------------------------------------------
 
-const { initialTime } = require("./function");
-const { verifyTime } = require("./verify");
+const { verifyTime, initialTime } = require("./verify");
+const { Automate } = require("./automate");
+
+setInterval(() => {
+	Automate();
+	// console.log("automative deletion..");
+}, 5000);
 
 app.get('/', async (req, res) => {
 	res.send("This is from our awesome OTP backend server...");
@@ -65,7 +70,7 @@ app.post('/generate', async (req, res) => {
 		});
 	} catch (error) {
 		console.log(error);
-		res.status(400).json({ message: 'something went wrong!' });
+		res.status(400).json({ message: 'something went wrong.' });
 	}
 });
 
@@ -80,14 +85,14 @@ app.post('/verify', async (req, res) => {
 				await db.collection(Docs).findOneAndDelete({ otp: req.body.otp });
 				res.status(200).json({ message: 'OTP Matched.', result: true });
 			} else {
-				res.status(400).json({ message: 'Please genarate a new otp...', result: false });
+				res.status(400).json({ message: 'Otp Expired...Please genarate a new otp.', result: false });
 			}
 		} else {
-			res.status(400).json({ message: 'Please genarate a new otp...', result: false });
+			res.status(400).json({ message: 'Otp Expired...Please genarate a new otp.', result: false });
 		}
 	} catch (error) {
 		console.log(error);
-		res.json({ message: 'something went wrong!' });
+		res.json({ message: 'something went wrong.' });
 	}
 });
 
