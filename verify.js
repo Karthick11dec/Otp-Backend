@@ -52,7 +52,7 @@ const verifyTime = (currentTime, olderTime, initialExpiry) => {
         return ans;
     }
     else { //when normal
-        let c = Convert(Current) + parseInt(Current[2]);
+        let c = Convert(Current) + Current[2];
         let diff = Math.abs(initialExpiry - c);
         if (diff <= expireTime) {
             ans = "valid";
@@ -68,9 +68,9 @@ const verifyTime = (currentTime, olderTime, initialExpiry) => {
 //----------------   genarate opt time   --------------- ////////////////////////
 
 const initialTime = (t) => {
-	let time = Extra(t);
-	let c = Convert(time);
-	return (c + parseInt(time[2]) + expireTime)
+    let time = Extra(t);
+    let c = Convert(time);
+    return (c + parseInt(time[2]))
 }
 
 module.exports = { verifyTime, initialTime };

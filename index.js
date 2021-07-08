@@ -19,12 +19,6 @@ const PORT = process.env.PORT || 5000;
 //--------------------------     coding start's here   ------------------------------------------
 
 const { verifyTime, initialTime } = require("./verify");
-const { Automate } = require("./automate");
-
-setInterval(() => {
-	Automate();
-	// console.log("automative deletion..");
-}, 5000);
 
 app.get('/', async (req, res) => {
 	res.send("This is from our awesome OTP backend server...");
@@ -39,8 +33,8 @@ app.post('/generate', async (req, res) => {
 			{
 				email: req.body.email,
 				otp: otp,
-				expiry: initialTime(new Date().toLocaleTimeString()),
-				time: new Date().toLocaleTimeString()
+				expiry: initialTime(req.body.time),
+				time: req.body.time
 			}
 		);
 		const transporter = nodemailer.createTransport({
@@ -68,6 +62,7 @@ app.post('/generate', async (req, res) => {
 				res.status(400).json({ err })
 			}
 		});
+		client.close();
 	} catch (error) {
 		console.log(error);
 		res.status(400).json({ message: 'something went wrong.' });
@@ -81,15 +76,32 @@ app.post('/verify', async (req, res) => {
 		const db = client.db(Database);
 		const user = await db.collection(Docs).findOne({ email: req.body.email, otp: req.body.otp });
 		if (user) {
-			if (verifyTime(new Date().toLocaleTimeString(), user.time, user.expiry) === "valid") {
+			let active = verifyTime(req.body.time, user.time, user.expiry)
+			if (active === "valid") {
 				await db.collection(Docs).findOneAndDelete({ otp: req.body.otp });
 				res.status(200).json({ message: 'OTP Matched.', result: true });
 			} else {
-				res.status(400).json({ message: 'Otp Expired...Please genarate a new otp.', result: false });
+				res.status(400).json({ message: 'Otp Expired (or) incorrect Otp...Please genarate a new otp.', result: false });
 			}
 		} else {
-			res.status(400).json({ message: 'Otp Expired...Please genarate a new otp.', result: false });
+			res.status(400).json({ message: 'Otp Expired (or) incorrect Otp...Please genarate a new otp.', result: false });
 		}
+
+		//auto delete expired otp's 
+		const data = await db.collection(Docs).find({}, { time: 1 }).toArray();
+		if (data.length > 0) {
+			data.forEach(item => {
+				let deletor = verifyTime(req.body.time, item.time, item.expiry);
+				if (deletor === "invalid") {
+					db.collection(Docs).findOneAndDelete({ _id: item._id })
+					console.log("successfully deleted...");
+				}
+				else {
+					console.log("no deletion...");
+				}
+			})
+		}
+		client.close();
 	} catch (error) {
 		console.log(error);
 		res.json({ message: 'something went wrong.' });
